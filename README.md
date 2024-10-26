@@ -58,6 +58,10 @@ CREATE TABLE requests (
     reason TEXT,
     status VARCHAR(20) DEFAULT 'Pending'
 );
+
+
+
+
 ![image](https://github.com/user-attachments/assets/28b0fc7e-64cc-477b-9f23-a8aa13ff97bd)
 
 admin username: admin_user
