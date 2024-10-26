@@ -1,3 +1,4 @@
+// RequestServlet.java
 package com.useraccessmanagement.servlets;
 
 import jakarta.servlet.ServletException;
@@ -5,69 +6,72 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+// Model class for Software
 
 @WebServlet("/requestAccess")
 public class RequestServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        List<j> softwareList = new ArrayList<>();
+
+        try (Connection conn = DatabaseHelper.getConnection()) {
+            String sql = "SELECT id, name FROM software";
+            try (PreparedStatement stmt = conn.prepareStatement(sql);
+                 ResultSet rs = stmt.executeQuery()) {
+
+                while (rs.next()) {
+                    int id = rs.getInt("id");
+                    String name = rs.getString("name");
+                    softwareList.add(new j(id, name));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            request.setAttribute("error", "Error loading software options");
+        }
+
+        request.setAttribute("softwareList", softwareList);
+        request.getRequestDispatcher("/jsp/requestAccess.jsp").forward(request, response);
+    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        // Retrieve parameters from the form
-        String softwareId = request.getParameter("softwareId");
+    	Integer userId = (Integer) request.getSession().getAttribute("userId");
+        int softwareId = Integer.parseInt(request.getParameter("softwareId"));
         String accessType = request.getParameter("accessType");
         String reason = request.getParameter("reason");
 
-        // Retrieve user ID from the session
-        HttpSession session = request.getSession();
-        Integer userId = (Integer) session.getAttribute("userId"); // Ensure this is set when the user logs in
-        
-
-        // Check if userId is null (not logged in)
-        if (userId == null) {
-            request.setAttribute("error", "User is not logged in.");
-            request.getRequestDispatcher("/jsp/error.jsp").forward(request, response);
-            return;
-        }
-
-        // Status is typically set to "Pending" initially
-        String status = "Pending";
-
-        // Insert into the database
         try (Connection conn = DatabaseHelper.getConnection()) {
-            String sql = "INSERT INTO requests (user_id, software_id, access_type, reason, status) VALUES (?, ?, ?, ?, ?)";
-            try (PreparedStatement statement = conn.prepareStatement(sql)) {
-                statement.setInt(1, userId); // Automatically set user ID from session
-                statement.setInt(2, Integer.parseInt(softwareId)); // Parse softwareId to int
-                statement.setString(3, accessType);
-                statement.setString(4, reason);
-                statement.setString(5, status);
+            String sql = "INSERT INTO requests (user_id, software_id, access_type, reason, status) VALUES (?, ?, ?, ?, 'Pending')";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, userId);
+                stmt.setInt(2, softwareId);
+                stmt.setString(3, accessType);
+                stmt.setString(4, reason);
 
-                int rowsInserted = statement.executeUpdate();
+                int rowsInserted = stmt.executeUpdate();
                 if (rowsInserted > 0) {
-                    System.out.println("requested successfully"); // Redirect to a success page
+                    request.setAttribute("message", "Access request submitted successfully!");
                 } else {
-                    request.setAttribute("error", "Failed to request access.");
-                    request.getRequestDispatcher("/jsp/error.jsp").forward(request, response);
+                    request.setAttribute("error", "Failed to submit access request.");
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace(); // Log the exception
-            request.setAttribute("error", "An error occurred while processing your request: " + e.getMessage());
-            request.getRequestDispatcher("/jsp/error.jsp").forward(request, response);
+            e.printStackTrace();
+            request.setAttribute("error", "Database error while submitting request.");
         }
-    }
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        // Redirect to the form page or show an error message
-        request.getRequestDispatcher("/jsp/requestAccess.jsp").forward(request, response);
+        doGet(request, response);
     }
 }
