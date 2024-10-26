@@ -92,7 +92,18 @@ Assign Roles (AssignRolesServlet.java)
 
 URL: /assignRoles
 Admins can assign or update user roles.
-
+Employee
+○ Can sign up and create an account.
+○ Can log in to the system.
+○ Can request access to software applications.
+○ Cannot approve or reject access requests.
+○ Cannot create new software applications.
+2. Manager
+○ Can log in to the system.
+○ Can view pending access requests.
+○ Can approve or reject access requests.
+○ Cannot request access to software applications.
+○ Cannot create new software applications.
 ***Running the Project
 Start the Server:
 Right-click on the project, select Run As -> Run on Server, and choose your server (e.g., Tomcat).
