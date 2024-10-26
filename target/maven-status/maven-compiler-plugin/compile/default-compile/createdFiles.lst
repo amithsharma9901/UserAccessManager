@@ -1,0 +1,6 @@
+com\useraccessmanagement\servlets\LoginServlet.class
+com\useraccessmanagement\servlets\ApprovalServlet.class
+com\useraccessmanagement\servlets\DatabaseHelper.class
+com\useraccessmanagement\servlets\RequestServlet.class
+com\useraccessmanagement\servlets\SignUpServlet.class
+com\useraccessmanagement\servlets\SoftwareServlet.class
