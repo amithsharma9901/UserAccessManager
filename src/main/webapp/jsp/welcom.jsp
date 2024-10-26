@@ -47,6 +47,8 @@
         <h1>Welcome to the User Access Management System</h1>
         <p>This system allows users to request access to software, and administrators to manage roles and permissions.</p>
         <a href="login" class="button">Login</a> <!-- Link to login page -->
+                <a href="signup" class="button">Signup</a> <!-- Link to login page -->
+
     </div>
 </body>
 </html>
